@@ -35,3 +35,6 @@ find_package(Thrift REQUIRED)
 include_directories(${THRIFT_INCLUDE_DIR})
 add_subdirectory(thrift)
 include_directories(${OSMDT_THRIFT_DIR})
+
+# Sources
+add_subdirectory(src)

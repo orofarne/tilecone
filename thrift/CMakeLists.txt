@@ -14,7 +14,7 @@ add_custom_command(
 	COMMAND ${THRIFT_COMPILER} --gen cpp --out ${CMAKE_CURRENT_BINARY_DIR} ${thrift_file}
 )
 
-add_custom_target(thriftbuf_autogeneration_target ALL
+add_custom_target(thrift_autogeneration_target ALL
 	DEPENDS ${thrift_file}
 )
 
@@ -22,7 +22,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 add_library(tilecone_thrift_lib STATIC
 	${thrift_files_cpp}
 )
-add_dependencies(tilecone_thrift_lib protobuf_autogeneration_target)
+add_dependencies(tilecone_thrift_lib thrift_autogeneration_target)
 target_link_libraries(tilecone_thrift_lib
 	${THRIFT_LIB}
 )
