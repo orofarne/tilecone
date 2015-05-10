@@ -30,11 +30,5 @@ else ()
 endif ()
 message(STATUS "CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
 
-# Thrift
-find_package(Thrift REQUIRED)
-include_directories(${THRIFT_INCLUDE_DIR})
-add_subdirectory(thrift)
-include_directories(${OSMDT_THRIFT_DIR})
-
 # Sources
 add_subdirectory(src)
