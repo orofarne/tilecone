@@ -1,4 +1,4 @@
-namespace cpp idx
+namespace cpp tilecone
 
 struct Tile {
 	1: i64 offset,
@@ -6,7 +6,7 @@ struct Tile {
 	3: i64 capacity
 }
 
-struct File {
+struct IndexFile {
 	1: i16 min_zoom,
 	2: i16 max_zoom,
 	3: i64 coord_x,

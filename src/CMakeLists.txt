@@ -1,5 +1,6 @@
 add_library(tilecone SHARED
 	tile.cpp
+	index.cpp
 )
 
 add_dependencies(tilecone
