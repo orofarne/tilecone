@@ -30,10 +30,31 @@ else ()
 endif ()
 message(STATUS "CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
 
+# Threads
+find_package(Threads REQUIRED)
+
 # Boost
 find_package(Boost 1.50 REQUIRED COMPONENTS system filesystem)
 include_directories(${Boost_INCLUDE_DIRS})
 
+# Vendor
+add_subdirectory(vendor)
+
 # Sources
 include_directories("include")
 add_subdirectory(src)
+
+# GTest magic
+if(TESTS)
+	message(STATUS "GTest include dir: ${GTEST_INCLUDE_DIR}")
+	include_directories(${GTEST_INCLUDE_DIR})
+	add_custom_target(test)
+	macro(run_test test_target)
+		add_custom_target(${test_target}_runtest
+			COMMAND ${test_target}
+			DEPENDS ${test_target}
+			WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
+		add_dependencies(test ${test_target}_runtest)
+	endmacro()
+	add_subdirectory(tests)
+endif(TESTS)
