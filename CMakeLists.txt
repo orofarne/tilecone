@@ -30,5 +30,10 @@ else ()
 endif ()
 message(STATUS "CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
 
+# Boost
+find_package(Boost 1.50 REQUIRED COMPONENTS system filesystem)
+include_directories(${Boost_INCLUDE_DIRS})
+
 # Sources
+include_directories("include")
 add_subdirectory(src)
