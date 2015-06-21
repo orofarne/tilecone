@@ -1,8 +1,9 @@
 #include "bucket.hpp"
+#include "zigzag.hpp"
 
-#include <cmath>
 #include <cstring>
 #include <cassert>
+#include <fstream>
 
 #include <boost/interprocess/file_mapping.hpp>
 #include <boost/interprocess/mapped_region.hpp>
@@ -25,11 +26,16 @@ Bucket::Bucket(char const* fName, uint16_t bucketZoom, uint16_t tileZoom, uint64
 	, bucketX_(bucketX)
 	, bucketY_(bucketY)
 {
+	assert(bucketZoom_ <= tileZoom_);
+
 	pimpl_.reset(new Pimpl);
 
-	pimpl_->tilesCount = (size_t)std::pow(4, tileZoom_ - bucketZoom_);
+	pimpl_->tilesCount = size_t(1) << (2 * (tileZoom_ - bucketZoom_));
 
 	bool isDirty = false;
+	if (!fs::exists(fName)) {
+		std::ofstream{fName, std::ios::app};
+	}
 	if (fs::file_size(fName) < (pimpl_->tilesCount * sizeof(Tile))) {
 		fs::resize_file(fName, pimpl_->tilesCount * sizeof(Tile));
 		isDirty = true;
@@ -47,7 +53,8 @@ Bucket::~Bucket() {
 std::tuple<Tile const*, size_t>
 Bucket::getTile(uint16_t zoom, uint64_t x, uint64_t y) {
 	if (zoom <= bucketZoom_) {
-		uint64_t M = (uint64_t)std::pow(2, bucketZoom_ - zoom);
+		// Return all data in bucket if bucket tile inside requested tile
+		uint64_t M = uint64_t(1) << (bucketZoom_ - zoom);
 		uint64_t x1 = bucketX_ / M;
 		uint64_t y1 = bucketY_ / M;
 		if (x1 == x && y1 == y)
@@ -55,16 +62,17 @@ Bucket::getTile(uint16_t zoom, uint64_t x, uint64_t y) {
 		else
 			return std::make_tuple((Tile const*)nullptr, (size_t)0);
 	} else {
-		uint64_t tileSize = (uint64_t)std::pow(2, tileZoom_ - zoom);
-		//                     may be negative----^~~~~~~~~~~~~~~^
-		if (tileSize < 1)
-			tileSize = 1;
-		uint64_t M = (uint64_t)std::pow(2, zoom - bucketZoom_);
+		// Search subrange of data in bucket tile
+		uint64_t tileSize = 1 << (tileZoom_ > zoom ? tileZoom_ - zoom : 0);
+		uint16_t zoomDiff = tileZoom_ - bucketZoom_;
+
+		uint64_t M = uint64_t(1) << (zoom - bucketZoom_);
 		if ((x / M) != bucketX_ || (y / M) != bucketY_)
 			return std::make_tuple((Tile const*)nullptr, (size_t)0);
+
 		uint64_t x1 = x % M;
 		uint64_t y1 = y % M;
-		uint64_t pos = y1*tileSize*M + x1*tileSize;
+		uint64_t pos = utils::zigZagPosition(zoomDiff, x1, y1);
 		return std::make_tuple(
 			(Tile const*)pimpl_->mmr.get_address() + pos,
 			(size_t)tileSize);
