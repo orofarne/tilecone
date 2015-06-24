@@ -21,7 +21,7 @@ struct DB::Pimpl {
   std::unique_ptr<Index> idx;
   std::unique_ptr<cache::lru_cache<std::string, BucketPtr>> bucketCache;
 
-  std::string coord2BucketName(uint16_t zoom, uint64_t x, uint64_t y);
+  BucketPtr getBucket(uint64_t x, uint64_t y);
 };
 
 DB::DB(std::string const& path, int mmappool) {
@@ -43,25 +43,42 @@ DB::~DB() {
 
 std::tuple<void const*, Tile const*, size_t>
 DB::getTiles(uint16_t zoom, uint64_t x, uint64_t y) {
-
+  auto bucket = pimpl_->getBucket(x, y);
+  return bucket->getTiles(zoom, x, y);
 }
 
 void
 DB::setTile(uint64_t x, uint64_t y, void const* data, size_t dataSize) {
-
+  auto bucket = pimpl_->getBucket(x, y);
+  bucket->setTile(x, y, data, dataSize);
 }
 
-std::string
-DB::Pimpl::coord2BucketName(uint16_t zoom, uint64_t x, uint64_t y) {
-  auto bucketZoom = idx->bucketZoom();
+BucketPtr
+DB::Pimpl::getBucket(uint64_t x, uint64_t y) {
+  auto M = idx->tileZoom() - idx->bucketZoom();
+  auto x1 = x >> M;
+  auto y1 = y >> M;
 
-  if (zoom < bucketZoom) {
-    throw std::invalid_argument(str( boost::format("Invalid zoom %1%: zoom < BucketZoom") % zoom ));
+  std::string bucketFile =
+    (basePath / str( boost::format("%1%_%2%.cone") % x1 % y1 )).native();
+
+  BucketPtr bucket;
+  try {
+    bucket = bucketCache->get(bucketFile);
+  }
+  catch(std::range_error const &) {
+    bucket.reset(new Bucket(
+      bucketFile,
+      idx->bucketZoom(),
+      idx->tileZoom(),
+      x1,
+      y1,
+      idx->blockSize()
+    ));
+    bucketCache->put(bucketFile, bucket);
   }
 
-  // TODO
-
-  return "";
+  return bucket;
 }
 
 } // namespace

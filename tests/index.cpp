@@ -14,11 +14,13 @@ TEST(Index, Index_Can_LoadFile) {
     fout
       << "[Tiles]\n"
       << "BucketZoom = 10\n"
-      << "TileZoom = 15\n";
+      << "TileZoom = 15\n"
+      << "BlockSize = 1024\n";
   }
 
   Index idx(fName);
 
   ASSERT_EQ(10, idx.bucketZoom());
   ASSERT_EQ(15, idx.tileZoom());
+  ASSERT_EQ(1024, idx.blockSize());
 }

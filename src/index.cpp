@@ -14,6 +14,7 @@ Index::Index(std::string const& fName) {
 
   bucketZoom_ = tree.get<uint64_t>("Tiles.BucketZoom");
   tileZoom_ = tree.get<uint64_t>("Tiles.TileZoom");
+  blockSize_ = tree.get<uint64_t>("Tiles.BlockSize");
 }
 
 Index::~Index() {
