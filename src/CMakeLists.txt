@@ -3,4 +3,5 @@ add_library(tilecone SHARED
 	zigzag.cpp
 	index.cpp
 	db.cpp
+	db_c.cpp
 )
