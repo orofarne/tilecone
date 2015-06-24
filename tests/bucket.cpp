@@ -43,12 +43,12 @@ TEST(Bucket, Bucket_Should_Can_StoreItem_And_ReadItBack) {
   std::string testData = "My test string";
   bucket->setTile(316893, 163547, testData.data(), testData.size());
 
-  std::tuple<Tile const*, size_t> tilesInfo = bucket->getTiles(19, 316893, 163547);
+  std::tuple<void const*, Tile const*, size_t> tilesInfo = bucket->getTiles(19, 316893, 163547);
 
-  ASSERT_EQ(1, std::get<1>(tilesInfo));
-  Tile const* ti = std::get<0>(tilesInfo);
+  ASSERT_EQ(1, std::get<2>(tilesInfo));
+  Tile const* ti = std::get<1>(tilesInfo);
   std::string resData = std::string(
-    (char *)bucket->data() + ti->offset,
+    (char *)std::get<0>(tilesInfo) + ti->offset,
     ti->size
   );
   ASSERT_EQ(testData, resData);

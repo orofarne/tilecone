@@ -65,7 +65,7 @@ Bucket::data() {
 	return (uint8_t *)pimpl_->mm->mmr.get_address() + pimpl_->indexSize;
 }
 
-std::tuple<Tile const*, size_t>
+std::tuple<void const*, Tile const*, size_t>
 Bucket::getTiles(uint16_t zoom, uint64_t x, uint64_t y) {
 	if (zoom <= bucketZoom_) {
 		// Return all data in bucket if bucket tile inside requested tile
@@ -73,9 +73,9 @@ Bucket::getTiles(uint16_t zoom, uint64_t x, uint64_t y) {
 		uint64_t x1 = bucketX_ / M;
 		uint64_t y1 = bucketY_ / M;
 		if (x1 == x && y1 == y)
-			return std::make_tuple((Tile const*)pimpl_->mm->mmr.get_address(), pimpl_->tilesCount);
+			return std::make_tuple(data(), (Tile const*)pimpl_->mm->mmr.get_address(), pimpl_->tilesCount);
 		else
-			return std::make_tuple((Tile const*)nullptr, (size_t)0);
+			return std::make_tuple(data(), (Tile const*)nullptr, (size_t)0);
 	} else {
 		// Search subrange of data in bucket tile
 		uint64_t tileSize = 1 << (tileZoom_ > zoom ? tileZoom_ - zoom : 0);
@@ -83,12 +83,13 @@ Bucket::getTiles(uint16_t zoom, uint64_t x, uint64_t y) {
 
 		uint64_t M = uint64_t(1) << (zoom - bucketZoom_);
 		if ((x / M) != bucketX_ || (y / M) != bucketY_)
-			return std::make_tuple((Tile const*)nullptr, (size_t)0);
+			return std::make_tuple(data(), (Tile const*)nullptr, (size_t)0);
 
 		uint64_t x1 = x % M;
 		uint64_t y1 = y % M;
 		uint64_t pos = utils::zigZagPosition(zoomDiff, x1, y1);
 		return std::make_tuple(
+			data(),
 			(Tile const*)pimpl_->mm->mmr.get_address() + pos,
 			(size_t)tileSize);
 	}

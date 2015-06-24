@@ -14,16 +14,16 @@ class Bucket {
 		Bucket(std::string const& fName, uint16_t bucketZoom, uint16_t tileZoom, uint64_t bucketX, uint64_t bucketY, size_t blockSize);
 		~Bucket();
 
-		// Returns link to data
-		void const * data();
-
 		// Returns subtiles of a tile
-		std::tuple<Tile const*, size_t> getTiles(uint16_t zoom, uint64_t x, uint64_t y);
+		std::tuple<void const*, Tile const*, size_t> getTiles(uint16_t zoom, uint64_t x, uint64_t y);
 		// Set new tile data. TileZoom only!
 		void setTile(uint64_t x, uint64_t y, void const* data, size_t dataSize);
 
 	private:
 		struct Pimpl;
+
+		// Returns link to data
+		void const * data();
 
 	private:
 		uint16_t bucketZoom_;
