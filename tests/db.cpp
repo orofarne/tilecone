@@ -27,7 +27,7 @@ TEST(DB, DB_Can_OpenDatabase) {
   DB db(dirName, 10);
 }
 
-TEST(DB, DB_Can_WriteData_To_Database) {
+TEST(DB, DB_Can_WriteData_To_Database_WithCorrectName) {
   std::string dirName = "__test_db2";
   fs::path dPath(dirName);
 
@@ -46,6 +46,8 @@ TEST(DB, DB_Can_WriteData_To_Database) {
 
   std::string testData = "My test string";
   db.setTile(316893, 163547, testData.data(), testData.size());
+
+  ASSERT_TRUE( fs::exists(dPath / "19805_10221.cone") );
 }
 
 
