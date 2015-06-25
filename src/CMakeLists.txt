@@ -5,3 +5,8 @@ add_library(tilecone SHARED
 	db.cpp
 	db_c.cpp
 )
+
+install(
+	TARGETS tilecone
+	LIBRARY DESTINATION lib
+)

@@ -42,6 +42,7 @@ add_subdirectory(vendor)
 
 # Sources
 include_directories("include")
+add_subdirectory(include)
 add_subdirectory(src)
 
 # GTest magic
