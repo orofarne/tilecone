@@ -22,7 +22,7 @@ db free_db(db d);
 int db_ok(db d);
 const char* last_error(db d);
 // Returns subtiles of a tile
-int get_tiles(db d, uint16_t zoom, uint64_t x, uint64_t y, void const** buf, tile const** tiles, size_t *tiles_len);
+int get_tiles(db d, uint16_t zoom, uint64_t x, uint64_t y, void const** buf, struct tile const** tiles, size_t *tiles_len);
 // Set new tile data. TileZoom only!
 int set_tile(db d, uint64_t x, uint64_t y, void const* data, size_t data_size);
 

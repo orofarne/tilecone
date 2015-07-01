@@ -50,7 +50,7 @@ extern "C" const char* last_error(db d) {
 }
 
 // Returns subtiles of a tile
-extern "C" int get_tiles(db d, uint16_t zoom, uint64_t x, uint64_t y, void const** buf, tile const** tiles, size_t *tiles_len) {
+extern "C" int get_tiles(db d, uint16_t zoom, uint64_t x, uint64_t y, void const** buf, struct tile const** tiles, size_t *tiles_len) {
   if (!d->db_) {
     d->lastError_ = "Invalid DB object";
     return 1;
