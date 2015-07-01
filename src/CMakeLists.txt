@@ -6,6 +6,10 @@ add_library(tilecone SHARED
 	db_c.cpp
 )
 
+target_link_libraries(tilecone
+	${Boost_LIBRARIES}
+)
+
 install(
 	TARGETS tilecone
 	LIBRARY DESTINATION lib
