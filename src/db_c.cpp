@@ -69,48 +69,22 @@ return 0;
 
 // Returns subtiles of a tile
 extern "C" int tc_get_tiles(tc_db d, uint16_t zoom, uint64_t x, uint64_t y, void const** buf, struct tc_tile const** tiles, size_t *tiles_len) {
-  if (!d->db_) {
-    d->lastError_ = "Invalid DB object";
-    return 1;
-  }
+  TESTDB;
 
-  try {
+  CTRY({
     Tile const* tilespp;
     std::tie(*buf, tilespp, *tiles_len) = d->db_->getTiles(zoom, x, y);
     *tiles = (struct tc_tile const*)tilespp;
-  }
-  catch(std::exception const& e) {
-    d->lastError_ = e.what();
-    return 1;
-  }
-  catch(...) {
-    d->lastError_ = "UNKNOWN ERROR";
-    return 1;
-  }
-
-  return 0;
+  });
 }
 
 // Set new tile data. TileZoom only!
 extern "C" int tc_set_tile(tc_db d, uint64_t x, uint64_t y, void const* data, size_t data_size) {
-  if (!d->db_) {
-    d->lastError_ = "Invalid DB object";
-    return 1;
-  }
+  TESTDB;
 
-  try {
+  CTRY({
     d->db_->setTile(x, y, data, data_size);
-  }
-  catch(std::exception const& e) {
-    d->lastError_ = e.what();
-    return 1;
-  }
-  catch(...) {
-    d->lastError_ = "UNKNOWN ERROR";
-    return 1;
-  }
-
-  return 0;
+  });
 }
 
 extern "C" uint64_t tc_bucket_zoom(tc_db d) {
