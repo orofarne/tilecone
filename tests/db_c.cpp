@@ -23,15 +23,15 @@ TEST(DB_C, DB_Can_WriteData_To_Database_And_Read_ItBack) {
       << "BlockSize = 1024\n";
   }
 
-  db d = new_db(dirName.c_str(), 10);
+  tc_db d = tc_new_db(dirName.c_str(), 10);
 
   std::string testData = "My test string";
-  set_tile(d, 316893, 163547, testData.data(), testData.size());
+  tc_set_tile(d, 316893, 163547, testData.data(), testData.size());
 
   void const* buf;
-  tile const* tiles;
+  struct tc_tile const* tiles;
   size_t tiles_len;
-  get_tiles(d, 19, 316893, 163547, &buf, &tiles, &tiles_len);
+  tc_get_tiles(d, 19, 316893, 163547, &buf, &tiles, &tiles_len);
 
   ASSERT_EQ(1, tiles_len);
   std::string resData = std::string(
@@ -40,7 +40,7 @@ TEST(DB_C, DB_Can_WriteData_To_Database_And_Read_ItBack) {
   );
   ASSERT_EQ(testData, resData);
 
-  free_db(d);
+  tc_free_db(d);
 }
 
 TEST(DB_C, DB_Can_Load_DBInfo) {
@@ -58,10 +58,10 @@ TEST(DB_C, DB_Can_Load_DBInfo) {
       << "BlockSize = 1024\n";
   }
 
-  db d = new_db(dirName.c_str(), 10);
+  tc_db d = tc_new_db(dirName.c_str(), 10);
 
-  ASSERT_EQ(15, bucket_zoom(d));
-  ASSERT_EQ(19, tile_zoom(d));
+  ASSERT_EQ(15, tc_bucket_zoom(d));
+  ASSERT_EQ(19, tc_tile_zoom(d));
 
-  free_db(d);
+  tc_free_db(d);
 }

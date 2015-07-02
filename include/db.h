@@ -8,27 +8,27 @@
 extern "C" {
 #endif
 
-struct tile {
+struct tc_tile {
 	uint64_t offset;
 	uint32_t size;
 	uint32_t capacity;
 };
 
-struct __db;
-typedef struct __db* db;
+struct __tc_db;
+typedef struct __tc_db* tc_db;
 
-db new_db(const char* path, int mmappool);
-db free_db(db d);
-int db_ok(db d);
-const char* last_error(db d);
+tc_db tc_new_db(const char* path, int mmappool);
+tc_db tc_free_db(tc_db d);
+int tc_db_ok(tc_db d);
+const char* tc_last_error(tc_db d);
 // Returns subtiles of a tile
-int get_tiles(db d, uint16_t zoom, uint64_t x, uint64_t y, void const** buf, struct tile const** tiles, size_t *tiles_len);
+int tc_get_tiles(tc_db d, uint16_t zoom, uint64_t x, uint64_t y, void const** buf, struct tc_tile const** tiles, size_t *tiles_len);
 // Set new tile data. TileZoom only!
-int set_tile(db d, uint64_t x, uint64_t y, void const* data, size_t data_size);
+int tc_set_tile(tc_db d, uint64_t x, uint64_t y, void const* data, size_t data_size);
 
 // Info:
-uint64_t bucket_zoom(db d);
-uint64_t tile_zoom(db d);
+uint64_t tc_bucket_zoom(tc_db d);
+uint64_t tc_tile_zoom(tc_db d);
 
 #ifdef __cplusplus
 }

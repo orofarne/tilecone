@@ -9,16 +9,16 @@
 
 using namespace tilecone;
 
-struct __db {
+struct __tc_db {
   std::unique_ptr<DB> db_;
   std::string lastError_;
 };
 
-extern "C" db new_db(const char* path, int mmappool) {
-  db res;
+extern "C" tc_db tc_new_db(const char* path, int mmappool) {
+  tc_db res;
 
   try {
-    res = new struct __db;
+    res = new struct __tc_db;
   }
   catch(...) {
     return NULL;
@@ -37,15 +37,15 @@ extern "C" db new_db(const char* path, int mmappool) {
   return res;
 }
 
-extern "C" db free_db(db d) {
+extern "C" tc_db tc_free_db(tc_db d) {
   delete d;
 }
 
-extern "C" int db_ok(db d) {
+extern "C" int tc_db_ok(tc_db d) {
   return d && d->lastError_.empty();
 }
 
-extern "C" const char* last_error(db d) {
+extern "C" const char* tc_last_error(tc_db d) {
   return d->lastError_.c_str();
 }
 
@@ -68,7 +68,7 @@ catch(...) { \
 return 0;
 
 // Returns subtiles of a tile
-extern "C" int get_tiles(db d, uint16_t zoom, uint64_t x, uint64_t y, void const** buf, struct tile const** tiles, size_t *tiles_len) {
+extern "C" int tc_get_tiles(tc_db d, uint16_t zoom, uint64_t x, uint64_t y, void const** buf, struct tc_tile const** tiles, size_t *tiles_len) {
   if (!d->db_) {
     d->lastError_ = "Invalid DB object";
     return 1;
@@ -77,7 +77,7 @@ extern "C" int get_tiles(db d, uint16_t zoom, uint64_t x, uint64_t y, void const
   try {
     Tile const* tilespp;
     std::tie(*buf, tilespp, *tiles_len) = d->db_->getTiles(zoom, x, y);
-    *tiles = (tile const*)tilespp;
+    *tiles = (struct tc_tile const*)tilespp;
   }
   catch(std::exception const& e) {
     d->lastError_ = e.what();
@@ -92,7 +92,7 @@ extern "C" int get_tiles(db d, uint16_t zoom, uint64_t x, uint64_t y, void const
 }
 
 // Set new tile data. TileZoom only!
-extern "C" int set_tile(db d, uint64_t x, uint64_t y, void const* data, size_t data_size) {
+extern "C" int tc_set_tile(tc_db d, uint64_t x, uint64_t y, void const* data, size_t data_size) {
   if (!d->db_) {
     d->lastError_ = "Invalid DB object";
     return 1;
@@ -113,7 +113,7 @@ extern "C" int set_tile(db d, uint64_t x, uint64_t y, void const* data, size_t d
   return 0;
 }
 
-extern "C" uint64_t bucket_zoom(db d) {
+extern "C" uint64_t tc_bucket_zoom(tc_db d) {
   TESTDB;
 
   uint64_t bucketZoom;
@@ -126,7 +126,7 @@ extern "C" uint64_t bucket_zoom(db d) {
   return bucketZoom;
 }
 
-extern "C" uint64_t tile_zoom(db d) {
+extern "C" uint64_t tc_tile_zoom(tc_db d) {
   TESTDB;
 
   uint64_t tileZoom;
