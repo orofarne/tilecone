@@ -81,4 +81,12 @@ DB::Pimpl::getBucket(uint64_t x, uint64_t y) {
   return bucket;
 }
 
+uint64_t DB::bucketZoom() {
+  return pimpl_->idx->bucketZoom();
+}
+
+uint64_t DB::tileZoom() {
+  return pimpl_->idx->tileZoom();
+}
+
 } // namespace

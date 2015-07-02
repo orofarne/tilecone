@@ -26,6 +26,10 @@ int get_tiles(db d, uint16_t zoom, uint64_t x, uint64_t y, void const** buf, str
 // Set new tile data. TileZoom only!
 int set_tile(db d, uint64_t x, uint64_t y, void const* data, size_t data_size);
 
+// Info:
+uint64_t bucket_zoom(db d);
+uint64_t tile_zoom(db d);
+
 #ifdef __cplusplus
 }
 #endif

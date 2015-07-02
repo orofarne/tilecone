@@ -42,3 +42,26 @@ TEST(DB_C, DB_Can_WriteData_To_Database_And_Read_ItBack) {
 
   free_db(d);
 }
+
+TEST(DB_C, DB_Can_Load_DBInfo) {
+  std::string dirName = "__test_db3_c";
+  fs::path dPath(dirName);
+
+  {
+    fs::remove_all(dPath);
+    fs::create_directory(dPath);
+    std::ofstream fout((dPath / "index.ini").native());
+    fout
+      << "[Tiles]\n"
+      << "BucketZoom = 15\n"
+      << "TileZoom = 19\n"
+      << "BlockSize = 1024\n";
+  }
+
+  db d = new_db(dirName.c_str(), 10);
+
+  ASSERT_EQ(15, bucket_zoom(d));
+  ASSERT_EQ(19, tile_zoom(d));
+
+  free_db(d);
+}

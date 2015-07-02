@@ -19,6 +19,10 @@ class DB {
     // Set new tile data. TileZoom only!
     void setTile(uint64_t x, uint64_t y, void const* data, size_t dataSize);
 
+    // DB Info
+    uint64_t bucketZoom();
+    uint64_t tileZoom();
+
   private:
     struct Pimpl;
     std::unique_ptr<Pimpl> pimpl_;

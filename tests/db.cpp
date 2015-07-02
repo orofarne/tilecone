@@ -81,3 +81,24 @@ TEST(DB, DB_Can_WriteData_To_Database_And_Read_ItBack) {
   );
   ASSERT_EQ(testData, resData);
 }
+
+TEST(DB, DB_Can_Load_DBInfo) {
+  std::string dirName = "__test_db4";
+  fs::path dPath(dirName);
+
+  {
+    fs::remove_all(dPath);
+    fs::create_directory(dPath);
+    std::ofstream fout((dPath / "index.ini").native());
+    fout
+      << "[Tiles]\n"
+      << "BucketZoom = 15\n"
+      << "TileZoom = 19\n"
+      << "BlockSize = 1024\n";
+  }
+
+  DB db(dirName, 10);
+
+  ASSERT_EQ(15, db.bucketZoom());
+  ASSERT_EQ(19, db.tileZoom());
+}
