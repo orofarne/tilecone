@@ -10,8 +10,8 @@ class Index {
     Index(std::string const& fName);
     ~Index();
 
-    inline uint64_t bucketZoom() { return bucketZoom_; }
-    inline uint64_t tileZoom() { return tileZoom_; }
+    inline uint16_t bucketZoom() { return bucketZoom_; }
+    inline uint16_t tileZoom() { return tileZoom_; }
     inline size_t blockSize() { return blockSize_; }
 
   protected:

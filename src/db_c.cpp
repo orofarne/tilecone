@@ -87,10 +87,10 @@ extern "C" int tc_set_tile(tc_db d, uint64_t x, uint64_t y, void const* data, si
   });
 }
 
-extern "C" uint64_t tc_bucket_zoom(tc_db d) {
+extern "C" uint16_t tc_bucket_zoom(tc_db d) {
   TESTDB;
 
-  uint64_t bucketZoom;
+  uint16_t bucketZoom;
   try {
     bucketZoom = d->db_->bucketZoom();
   }
@@ -100,10 +100,10 @@ extern "C" uint64_t tc_bucket_zoom(tc_db d) {
   return bucketZoom;
 }
 
-extern "C" uint64_t tc_tile_zoom(tc_db d) {
+extern "C" uint16_t tc_tile_zoom(tc_db d) {
   TESTDB;
 
-  uint64_t tileZoom;
+  uint16_t tileZoom;
   try {
     tileZoom = d->db_->tileZoom();
   }

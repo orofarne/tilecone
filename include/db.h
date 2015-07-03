@@ -27,8 +27,8 @@ int tc_get_tiles(tc_db d, uint16_t zoom, uint64_t x, uint64_t y, void const** bu
 int tc_set_tile(tc_db d, uint64_t x, uint64_t y, void const* data, size_t data_size);
 
 // Info:
-uint64_t tc_bucket_zoom(tc_db d);
-uint64_t tc_tile_zoom(tc_db d);
+uint16_t tc_bucket_zoom(tc_db d);
+uint16_t tc_tile_zoom(tc_db d);
 
 #ifdef __cplusplus
 }
