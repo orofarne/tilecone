@@ -111,31 +111,38 @@ Bucket::setTile(uint64_t x, uint64_t y, void const* data, size_t dataSize) {
 		);
 		tile->size = dataSize;
 	} else {
+		auto nBlocks = (dataSize - tile->capacity) / blockSize_ +
+											((dataSize - tile->capacity) % blockSize_ == 0 ? 0 : 1);
+
 		// Resize file..
 		// Close mapping
 		pimpl_->mm.reset();
 
-		// Add new block
+		// Add new blocks
 		auto fSize = fs::file_size(pimpl_->fName);
-		fs::resize_file(pimpl_->fName, fSize + blockSize_);
+		fs::resize_file(pimpl_->fName, fSize + blockSize_*nBlocks);
 
 		// Reopen mapping
 		pimpl_->mm.reset(new MMFile);
 		pimpl_->mm->mmf = bip::file_mapping(pimpl_->fName.c_str(), bip::read_write);
 		pimpl_->mm->mmr = bip::mapped_region(pimpl_->mm->mmf, bip::read_write);
 
-		// Move data
 		tile = (Tile *)pimpl_->mm->mmr.get_address() + pos; // fix tile link
-		memmove(
-			(uint8_t *)pimpl_->mm->mmr.get_address() + pimpl_->indexSize + tile->offset + blockSize_,
-			(uint8_t *)pimpl_->mm->mmr.get_address() + pimpl_->indexSize + tile->offset,
-			fSize - pimpl_->indexSize - tile->offset
-		);
+
+		// Move next data
+		auto tileEnd = pimpl_->indexSize + tile->offset + tile->capacity;
+		for (auto dOff = fSize - blockSize_; dOff >= tileEnd; dOff -= blockSize_) {
+			memmove(
+				(uint8_t *)pimpl_->mm->mmr.get_address() + dOff + blockSize_*nBlocks,
+				(uint8_t *)pimpl_->mm->mmr.get_address() + dOff,
+				blockSize_
+			);
+		}
 
 		// Fix index
 		for (auto i = pos + 1; i < pimpl_->tilesCount; ++i) {
 			auto tile = (Tile *)pimpl_->mm->mmr.get_address() + i;
-			tile->offset += blockSize_;
+			tile->offset += blockSize_*nBlocks;
 		}
 
 		// Set data
@@ -146,7 +153,7 @@ Bucket::setTile(uint64_t x, uint64_t y, void const* data, size_t dataSize) {
 			dataSize
 		);
 		tile->size = dataSize;
-		tile->capacity += blockSize_;
+		tile->capacity += blockSize_*nBlocks;
 	}
 }
 
