@@ -9,6 +9,10 @@
 #include <boost/interprocess/mapped_region.hpp>
 #include <boost/filesystem.hpp>
 
+#ifdef TILECONE_MT
+#include <boost/thread/shared_mutex.hpp>
+#endif
+
 namespace bip = boost::interprocess;
 namespace fs = boost::filesystem;
 
@@ -24,6 +28,9 @@ struct Bucket::Pimpl {
 	std::unique_ptr<MMFile> mm;
 	size_t tilesCount;
 	size_t indexSize;
+#ifdef TILECONE_MT
+	boost::shared_mutex shMu;
+#endif
 };
 
 Bucket::Bucket(std::string const& fName, uint16_t bucketZoom, uint16_t tileZoom, uint64_t bucketX, uint64_t bucketY, size_t blockSize)
@@ -67,6 +74,11 @@ Bucket::data() {
 
 std::tuple<void const*, Tile const*, size_t>
 Bucket::getTiles(uint16_t zoom, uint64_t x, uint64_t y) {
+#ifdef TILECONE_MT
+	// get shared access
+	boost::shared_lock<boost::shared_mutex> lock(pimpl_->shMu);
+#endif
+
 	if (zoom <= bucketZoom_) {
 		// Return all data in bucket if bucket tile inside requested tile
 		uint64_t M = uint64_t(1) << (bucketZoom_ - zoom);
@@ -98,6 +110,13 @@ Bucket::getTiles(uint16_t zoom, uint64_t x, uint64_t y) {
 
 void
 Bucket::setTile(uint64_t x, uint64_t y, void const* data, size_t dataSize) {
+#ifdef TILECONE_MT
+	// get upgradable access
+  boost::upgrade_lock<boost::shared_mutex> lock(pimpl_->shMu);
+  // get exclusive access
+  boost::upgrade_to_unique_lock<boost::shared_mutex> uniqueLock(lock);
+#endif
+
 	uint16_t zoomDiff = tileZoom_ - bucketZoom_;
 	uint64_t M = uint64_t(1) << (zoomDiff);
 	uint64_t pos = utils::zigZagPosition(zoomDiff, x % M, y % M);

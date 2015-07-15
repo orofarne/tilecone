@@ -34,7 +34,8 @@ message(STATUS "CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
 find_package(Threads REQUIRED)
 
 # Boost
-find_package(Boost 1.50 REQUIRED COMPONENTS system filesystem)
+set(Boost_USE_MULTITHREADED ON)
+find_package(Boost 1.50 REQUIRED COMPONENTS system filesystem thread)
 include_directories(${Boost_INCLUDE_DIRS})
 
 # Vendor
