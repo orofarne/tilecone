@@ -19,6 +19,14 @@ install(
 	LIBRARY DESTINATION lib
 )
 
+add_library(tilecone_static STATIC
+	${tilecone_SRC}
+)
+
+target_link_libraries(tilecone_static
+	${Boost_LIBRARIES}
+)
+
 add_library(tilecone_mt SHARED
 	${tilecone_SRC}
 )
@@ -34,4 +42,16 @@ target_link_libraries(tilecone_mt
 install(
 	TARGETS tilecone_mt
 	LIBRARY DESTINATION lib
+)
+
+add_library(tilecone_static_mt STATIC
+	${tilecone_SRC}
+)
+
+set_target_properties(tilecone_static_mt PROPERTIES
+  COMPILE_FLAGS "-DTILECONE_MT"
+)
+
+target_link_libraries(tilecone_static_mt
+	${Boost_LIBRARIES}
 )
