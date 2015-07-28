@@ -15,7 +15,7 @@ TEST(Bucket, Bucket_Should_CreatesNewFile_WithoutError) {
   // Remove old file
   fs::remove(fName);
 
-  std::unique_ptr<Bucket> bucket(new Bucket(fName, 13, 19, 0, 0, 1024));
+  std::unique_ptr<Bucket> bucket(new Bucket(fName, 13, 19, 0, 0, 1024, true));
 
   ASSERT_TRUE((bool)bucket);
 }
@@ -26,7 +26,7 @@ TEST(Bucket, Bucket_Should_Can_StoreItem) {
   // Remove old file
   fs::remove(fName);
 
-  std::unique_ptr<Bucket> bucket(new Bucket(fName, 15, 19, 19805, 10221, 1024));
+  std::unique_ptr<Bucket> bucket(new Bucket(fName, 15, 19, 19805, 10221, 1024, true));
 
   std::string testData = "My test string";
   bucket->setTile(316894, 163547, testData.data(), testData.size());
@@ -38,7 +38,7 @@ TEST(Bucket, Bucket_Should_Can_StoreItem_And_ReadItBack) {
   // Remove old file
   fs::remove(fName);
 
-  std::unique_ptr<Bucket> bucket(new Bucket(fName, 15, 19, 19805, 10221, 1024));
+  std::unique_ptr<Bucket> bucket(new Bucket(fName, 15, 19, 19805, 10221, 1024, true));
 
   std::string testData = "My test string";
   bucket->setTile(316893, 163547, testData.data(), testData.size());

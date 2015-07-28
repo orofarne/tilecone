@@ -8,6 +8,7 @@
 #include <boost/interprocess/file_mapping.hpp>
 #include <boost/interprocess/mapped_region.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/format.hpp>
 
 #ifdef TILECONE_MT
 #include <boost/thread/shared_mutex.hpp>
@@ -33,7 +34,19 @@ struct Bucket::Pimpl {
 #endif
 };
 
-Bucket::Bucket(std::string const& fName, uint16_t bucketZoom, uint16_t tileZoom, uint64_t bucketX, uint64_t bucketY, size_t blockSize)
+Bucket::NotFound::NotFound(std::string fName)
+{
+	message_ = (boost::format("File '%1%' not found") % fName).str();
+}
+
+Bucket::NotFound::~NotFound() {
+}
+
+const char* Bucket::NotFound::what() const noexcept {
+	return message_.c_str();
+}
+
+Bucket::Bucket(std::string const& fName, uint16_t bucketZoom, uint16_t tileZoom, uint64_t bucketX, uint64_t bucketY, size_t blockSize, bool create)
 	: bucketZoom_(bucketZoom)
 	, tileZoom_(tileZoom)
 	, bucketX_(bucketX)
@@ -50,7 +63,10 @@ Bucket::Bucket(std::string const& fName, uint16_t bucketZoom, uint16_t tileZoom,
 
 	bool isDirty = false;
 	if (!fs::exists(pimpl_->fName)) {
-		std::ofstream{pimpl_->fName, std::ios::app};
+		if (create)
+			std::ofstream{pimpl_->fName, std::ios::app};
+		else
+			throw NotFound{pimpl_->fName};
 	}
 	if (fs::file_size(pimpl_->fName) < (pimpl_->tilesCount * sizeof(Tile))) {
 		fs::resize_file(pimpl_->fName, pimpl_->indexSize);

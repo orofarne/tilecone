@@ -21,7 +21,7 @@ struct DB::Pimpl {
   std::unique_ptr<Index> idx;
   std::unique_ptr<cache::lru_cache<std::string, BucketPtr>> bucketCache;
 
-  BucketPtr getBucket(uint16_t zoom, uint64_t x, uint64_t y);
+  BucketPtr getBucket(uint16_t zoom, uint64_t x, uint64_t y, bool create);
 };
 
 DB::DB(std::string const& path, int mmappool) {
@@ -43,18 +43,23 @@ DB::~DB() {
 
 std::tuple<void const*, Tile const*, size_t>
 DB::getTiles(uint16_t zoom, uint64_t x, uint64_t y) {
-  auto bucket = pimpl_->getBucket(zoom, x, y);
-  return bucket->getTiles(zoom, x, y);
+  try {
+    auto bucket = pimpl_->getBucket(zoom, x, y, false);
+    return bucket->getTiles(zoom, x, y);
+  }
+  catch(Bucket::NotFound const&) {
+    return std::make_tuple((void *)nullptr, (Tile const*)nullptr, (size_t)0);
+  }
 }
 
 void
 DB::setTile(uint64_t x, uint64_t y, void const* data, size_t dataSize) {
-  auto bucket = pimpl_->getBucket(pimpl_->idx->tileZoom(), x, y);
+  auto bucket = pimpl_->getBucket(pimpl_->idx->tileZoom(), x, y, true);
   bucket->setTile(x, y, data, dataSize);
 }
 
 BucketPtr
-DB::Pimpl::getBucket(uint16_t zoom, uint64_t x, uint64_t y) {
+DB::Pimpl::getBucket(uint16_t zoom, uint64_t x, uint64_t y, bool create) {
   auto M = zoom - idx->bucketZoom();
   auto x1 = M >= 0 ? x >> M : x << M;
   auto y1 = M >= 0 ? y >> M : x << M;
@@ -73,7 +78,8 @@ DB::Pimpl::getBucket(uint16_t zoom, uint64_t x, uint64_t y) {
       idx->tileZoom(),
       x1,
       y1,
-      idx->blockSize()
+      idx->blockSize(),
+      create
     ));
     bucketCache->put(bucketFile, bucket);
   }

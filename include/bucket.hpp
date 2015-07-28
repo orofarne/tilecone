@@ -6,12 +6,23 @@
 #include <cstdint>
 #include <tuple>
 #include <memory>
+#include <exception>
 
 namespace tilecone {
 
 class Bucket {
 	public:
-		Bucket(std::string const& fName, uint16_t bucketZoom, uint16_t tileZoom, uint64_t bucketX, uint64_t bucketY, size_t blockSize);
+		class NotFound : public std::exception {
+			public:
+				NotFound(std::string fName);
+				virtual ~NotFound();
+				virtual const char* what() const noexcept;
+			protected:
+				std::string message_;
+		};
+
+	public:
+		Bucket(std::string const& fName, uint16_t bucketZoom, uint16_t tileZoom, uint64_t bucketX, uint64_t bucketY, size_t blockSize, bool create);
 		~Bucket();
 
 		// Returns subtiles of a tile
