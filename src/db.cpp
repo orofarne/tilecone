@@ -21,7 +21,7 @@ struct DB::Pimpl {
   std::unique_ptr<Index> idx;
   std::unique_ptr<cache::lru_cache<std::string, BucketPtr>> bucketCache;
 
-  BucketPtr getBucket(uint64_t x, uint64_t y);
+  BucketPtr getBucket(uint16_t zoom, uint64_t x, uint64_t y);
 };
 
 DB::DB(std::string const& path, int mmappool) {
@@ -43,21 +43,21 @@ DB::~DB() {
 
 std::tuple<void const*, Tile const*, size_t>
 DB::getTiles(uint16_t zoom, uint64_t x, uint64_t y) {
-  auto bucket = pimpl_->getBucket(x, y);
+  auto bucket = pimpl_->getBucket(zoom, x, y);
   return bucket->getTiles(zoom, x, y);
 }
 
 void
 DB::setTile(uint64_t x, uint64_t y, void const* data, size_t dataSize) {
-  auto bucket = pimpl_->getBucket(x, y);
+  auto bucket = pimpl_->getBucket(pimpl_->idx->tileZoom(), x, y);
   bucket->setTile(x, y, data, dataSize);
 }
 
 BucketPtr
-DB::Pimpl::getBucket(uint64_t x, uint64_t y) {
-  auto M = idx->tileZoom() - idx->bucketZoom();
-  auto x1 = x >> M;
-  auto y1 = y >> M;
+DB::Pimpl::getBucket(uint16_t zoom, uint64_t x, uint64_t y) {
+  auto M = zoom - idx->bucketZoom();
+  auto x1 = M >= 0 ? x >> M : x << M;
+  auto y1 = M >= 0 ? y >> M : x << M;
 
   std::string bucketFile =
     (basePath / str( boost::format("%1%_%2%.cone") % x1 % y1 )).native();

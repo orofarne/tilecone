@@ -207,3 +207,35 @@ TEST(DB, DB_Can_WriteData_MultipleTimes_To_Database_And_Read_Back_NextCell) {
   );
   ASSERT_EQ(testData, resData);
 }
+
+TEST(DB, DB_Can_WriteData_To_Database_And_Read_ItBack_On_AnotherZoom) {
+  std::string dirName = "__test_db3";
+  fs::path dPath(dirName);
+
+  {
+    fs::remove_all(dPath);
+    fs::create_directory(dPath);
+    std::ofstream fout((dPath / "index.ini").native());
+    fout
+      << "[Tiles]\n"
+      << "BucketZoom = 15\n"
+      << "TileZoom = 19\n"
+      << "BlockSize = 1024\n";
+  }
+
+  DB db(dirName, 10);
+
+  std::string testData = "My test string";
+  db.setTile(316893, 163547, testData.data(), testData.size());
+
+  std::tuple<void const*, Tile const*, size_t> tilesInfo = db.getTiles(18, 158446, 81773);
+
+  ASSERT_EQ(4, std::get<2>(tilesInfo));
+  Tile const* ti = std::get<1>(tilesInfo);
+  ti += 3;
+  std::string resData = std::string(
+    (char *)std::get<0>(tilesInfo) + ti->offset,
+    ti->size
+  );
+  ASSERT_EQ(testData, resData);
+}
