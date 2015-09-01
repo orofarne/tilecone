@@ -9,6 +9,10 @@
 #include <boost/filesystem.hpp>
 #include <boost/format.hpp>
 
+#ifdef TILECONE_MT
+#include <boost/thread/mutex.hpp>
+#endif
+
 namespace fs = boost::filesystem;
 
 namespace tilecone {
@@ -20,6 +24,9 @@ struct DB::Pimpl {
   fs::path basePath;
   std::unique_ptr<Index> idx;
   std::unique_ptr<cache::lru_cache<std::string, BucketPtr>> bucketCache;
+#ifdef TILECONE_MT
+  boost::mutex cache_mutex;
+#endif
 
   BucketPtr getBucket(uint16_t zoom, uint64_t x, uint64_t y, bool create);
 };
@@ -60,6 +67,10 @@ DB::setTile(uint64_t x, uint64_t y, void const* data, size_t dataSize) {
 
 BucketPtr
 DB::Pimpl::getBucket(uint16_t zoom, uint64_t x, uint64_t y, bool create) {
+#ifdef TILECONE_MT
+   boost::mutex::scoped_lock scoped_lock(cache_mutex);
+#endif
+
   auto M = zoom - idx->bucketZoom();
   auto x1 = M >= 0 ? x >> M : x << M;
   auto y1 = M >= 0 ? y >> M : x << M;
